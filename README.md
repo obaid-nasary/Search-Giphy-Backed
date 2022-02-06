@@ -1,8 +1,8 @@
 # Search-Giphy-Backed
 
 This is a web application that can process text data that be a word, phrase, sentence or an article using [IBM's Natural Language Understanding Keyword Extraction API](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-getting-started) and extracts keywords from the given text. 
-The web application is also using another popular Gifs API from [GIPHY API](https://developers.giphy.com/docs/api/endpoint) to search for Gifs using the search endpoint based on the keywords extracted.
-The application also has front-end which built in [Angular](https://angular.io/) the link to the reposity is [obaidnasary/Search-Giphy-Frontend/Public](https://github.com/obaidnasary/Search-Giphy-Frontend/tree/master).  
+<br/>The web application is also using another popular Gifs API from [GIPHY API](https://developers.giphy.com/docs/api/endpoint) to search for Gifs using the search endpoint based on the keywords extracted.
+<br/>The application also has front-end which is built in [Angular](https://angular.io/) the link to the repository is [obaidnasary/Search-Giphy-Frontend/Public](https://github.com/obaidnasary/Search-Giphy-Frontend/tree/master).  
 
 ## Features
 
