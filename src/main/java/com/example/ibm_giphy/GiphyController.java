@@ -4,10 +4,6 @@ package com.example.ibm_giphy;
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
 import com.ibm.watson.natural_language_understanding.v1.NaturalLanguageUnderstanding;
 import com.ibm.watson.natural_language_understanding.v1.model.*;
-import com.monkeylearn.MonkeyLearn;
-import com.monkeylearn.MonkeyLearnException;
-import com.monkeylearn.MonkeyLearnResponse;
-import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -27,42 +23,19 @@ public class GiphyController {
     private final String api_url;
 
 
-    private final GiphyService giphyService;
-
     @Autowired
-    public GiphyController(@Value("${apiKey}") String api_key, @Value("${apiUrl}") String api_url, GiphyService giphyService) {
+    public GiphyController(@Value("${apiKey}") String api_key, @Value("${apiUrl}") String api_url) {
         this.api_key = api_key;
         this.api_url = api_url;
-        this.giphyService = giphyService;
     }
 
 
-    @PostMapping("/keyword")
-    public ResponseEntity<Giphy> addNewGiphyLog(@RequestBody Giphy newGiphy){
-        Giphy giphy = giphyService.addNewLog(newGiphy);
-        return new ResponseEntity<>(giphy, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/all")
-    public List<Giphy> getGiphyLog(){
-        return giphyService.getGiphyLog();
-    }
-
-    @GetMapping("/login/{username}/{password}")
-    public boolean getByUsername(@PathVariable String username, @PathVariable String password){
-        Optional<Giphy> giphyList = giphyService.getByUsername(username, password);
-        if(giphyList.isPresent()){
-            System.out.println("I was hit by oyou");
-            return true;
-
-        }
-//        return giphyService.getByUsername(username, password);
-
-        return false;
-    }
-
-
-
+    /**
+     *
+     * @param searchedText
+     * @return the extracted keywords from the searched text provided
+     * using IBM Natural Language Understanding Api
+     */
     @GetMapping("/keyword/{searchedText}")
     public String ibmKeyword(@PathVariable String searchedText) {
 
@@ -124,7 +97,7 @@ public class GiphyController {
 //        System.out.println(sortedMap); // for debugging
 
         /**
-         * Iterate through the @sortedMap take the first five keywords from
+         * Iterate through the @sortedMap take the keywords from
          * the @sortedMap and concat it into @values
          */
         int count = 0;
@@ -138,6 +111,7 @@ public class GiphyController {
         /**
          * Split the sorted string object by whitespaces for each word and concat it into
          * a string for the final value
+         * If result less than 5 words then all the string else just 5 words with higher relevance
          */
         String[] split = values.split(" ");
         int i = 0;
@@ -159,121 +133,10 @@ public class GiphyController {
         return finalValue;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    @GetMapping("/classify")
-    public JSONArray classifyText() throws MonkeyLearnException {
-
-        MonkeyLearn ml = new MonkeyLearn("32885825f069bc35286049084e6007e470a94945");
-        String[] textList = {"I am excited to see her again in the afterlife when she comes back to me and hugs me so bad that I don't feel anything at all."};
-        String keywordModelId = "ex_YCya9nrn";
-        String classifierModelId = "cl_o46qggZq";
-//        MonkeyLearnResponse res = ml.classifiers.classify("cl_o46qggZq", textList, false);
-//        ExtraParam[] extraParams = {new ExtraParam("max_keywords", "30")};
-//        MonkeyLearnResponse res = ml.extractors.extract("cl_o46qggZq", textList, extraParams);
-        MonkeyLearnResponse res = ml.extractors.extract(keywordModelId, textList);
-
-//        JsonObject data = new Gson().fromJson(jsonString, JsonObject.class);
-//        JsonArray names = data .get("items").getAsJsonArray();
-//        for(JsonElement element : names){
-//            JsonObject object = element.getAsJsonObject();
-//            System.out.println(object.get("metadata").getAsJsonObject().get("name").getAsString());
-//        }
-
-//        System.out.println(res.arrayResult.get(0).subList(0, 0).get(0).getClass().getName());
-//        System.out.println(res.arrayResult.stream().findFirst().stream().toArray());
-//        System.out.println(res.arrayResult.get(1));
-        return res.arrayResult;
+    @GetMapping("/takeme")
+    public String takeMe(){
+        return "Obaid is your name";
     }
-
-    @GetMapping("/concept")
-    public AnalysisResults ibmConcept(){
-
-        IamAuthenticator authenticator = new IamAuthenticator(api_key);
-
-        NaturalLanguageUnderstanding naturalLanguageUnderstanding = new NaturalLanguageUnderstanding("2021-08-01", authenticator);
-        naturalLanguageUnderstanding.setServiceUrl(api_url);
-
-        String url = "A daily live broadcast provides current domestic and international news, weather reports \" +\n" +
-                "                \"and interviews with newsmakers from the worlds of politics, business, media, entertainment and sports.";
-
-        ConceptsOptions concepts = new ConceptsOptions.Builder()
-                .limit(20)
-                .build();
-
-        Features features = new Features.Builder()
-                .concepts(concepts)
-                .build();
-
-        AnalyzeOptions parameters = new AnalyzeOptions.Builder()
-                .text(url)
-                .features(features)
-                .build();
-
-        AnalysisResults response = naturalLanguageUnderstanding
-                .analyze(parameters)
-                .execute()
-                .getResult();
-
-        System.out.println(response);
-        return response;
-    }
-
-
-    @GetMapping("/entities")
-    public AnalysisResults ibmEntities() {
-
-        IamAuthenticator authenticator = new IamAuthenticator(api_key);
-        NaturalLanguageUnderstanding naturalLanguageUnderstanding = new NaturalLanguageUnderstanding("2021-08-01", authenticator);
-        naturalLanguageUnderstanding.setServiceUrl(api_url);
-
-        String url = "IBM is an American multinational technology " +
-                "company headquartered in Armonk, New York, " +
-                "United States, with operations in over 170 countries.";
-
-        EntitiesOptions entities = new EntitiesOptions.Builder()
-                .sentiment(true)
-                .emotion(true)
-                .limit(2)
-                .build();
-
-        KeywordsOptions keywordsOptions = new KeywordsOptions.Builder()
-                .emotion(true)
-                .sentiment(true)
-                .limit(2)
-                .build();
-
-        Features features = new Features.Builder()
-                .entities(entities)
-                .keywords(keywordsOptions)
-                .build();
-
-        AnalyzeOptions parameters = new AnalyzeOptions.Builder()
-                .text(url)
-                .features(features)
-                .build();
-
-        AnalysisResults response = naturalLanguageUnderstanding
-                .analyze(parameters)
-                .execute()
-                .getResult();
-        System.out.println(response);
-
-        return response;
-    }
-
-
-
-
 
 
 }

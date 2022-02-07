@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  backendserver:
+    build: ./
+    image: obaidnasary/ibmgiphy
+    ports:
+      - "8082"
+    restart: always
+  frontend:
+    build: ./
+    image: obaidnasary/ibm-giphy-backend
+    depends_on:
+      - "backendserver"
+    ports:
+      - "81:81"
